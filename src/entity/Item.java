@@ -1,6 +1,8 @@
 package entity;
 
-public class Item {
+import java.io.Serializable;
+
+public class Item implements Serializable {
     private String name;
     private String description;
     private int quantity;
@@ -47,10 +49,10 @@ public class Item {
 
     public void display() {
         System.out.println("\nITEM DETAILS");
-        System.out.println("Name: " + name);
-        System.out.println("Description: " + description);
-        System.out.println("Quantity: " + quantity);
-        System.out.println("Price: " + price + "\n");
+        System.out.println("Name: " + getName());
+        System.out.println("Description: " + getDescription());
+        System.out.println("Quantity: " + getQuantity());
+        System.out.println("Price: " + getPrice() + "\n");
     }
 
     @Override

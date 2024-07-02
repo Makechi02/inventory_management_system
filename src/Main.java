@@ -1,23 +1,16 @@
+import entity.Inventory;
 import entity.Item;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static final List<Item> items = new ArrayList<>();
+    private static final String FILENAME = "inventory.dat";
+    private static final Inventory inventory = Inventory.loadFromFile(FILENAME);
+    private static final List<Item> items = inventory.getItems();
 
     public static void main(String[] args) {
-        populateList();
         displayMenu();
-    }
-
-    private static void populateList() {
-        items.add(new Item("Laptop", "Dell Inspiron 15", 10, 7000));
-        items.add(new Item("Smartphone", "IPhone 12", 5, 10000));
-        items.add(new Item("Mouse", "Logitech Wireless Mouse", 20, 300));
-        items.add(new Item("Keyboard", "Mechanical Gaming Keyboard", 15, 800));
-        items.add(new Item("Headphones", "Sony Noise-Cancelling Headphone", 8, 2000));
     }
 
     private static void displayMenu() {
@@ -76,7 +69,7 @@ public class Main {
         double price = scanner.nextDouble();
 
         Item item = new Item(name, description, quantity, price);
-        items.add(item);
+        inventory.addItem(item);
         System.out.println("Item added successfully");
         displayMenu();
     }
@@ -87,11 +80,19 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter name of item to update: ");
         String name = scanner.nextLine();
+        int index = -1;
 
         for (Item item : items) {
             if (item.getName().equals(name)) {
-                updateItem(item);
+                index = items.indexOf(item);
             }
+        }
+
+        if (index == -1) System.out.println("Item not found");
+        else {
+            Item item = inventory.getItem(index);
+            updateItem(item);
+            inventory.updateItem(index, item);
         }
 
         displayMenu();
@@ -105,7 +106,7 @@ public class Main {
         System.out.println("2. Description");
         System.out.println("3. Quantity");
         System.out.println("4. Price");
-        System.out.println("5. Cancel");
+        System.out.println("5. Done");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -133,7 +134,7 @@ public class Main {
             }
             case 5 -> {
                 System.out.println();
-                displayMenu();
+                return;
             }
             default -> {
                 System.out.println("Invalid choice\nPlease try again");
@@ -150,19 +151,25 @@ public class Main {
         System.out.print("Enter name of item to delete: ");
         String name = scanner.nextLine();
 
-        List<Item> list = items.stream().filter(item -> item.getName().equals(name)).toList();
+        int index = -1;
 
-        if (list.isEmpty()) System.out.println("Item not found");
+        for (Item item : items) {
+            if (item.getName().equals(name)) {
+                index = items.indexOf(item);
+            }
+        }
+
+        if (index == -1) System.out.println("Item not found");
         else {
-            Item item = list.getFirst();
-            items.remove(item);
-            System.out.println("Item successfully deleted");
+            Item item = inventory.deleteItem(index);
+            if (item != null) System.out.println("Item deleted successfully");
         }
 
         displayMenu();
     }
 
     private static void handleExit() {
+        Inventory.saveToFile(inventory, FILENAME);
         System.exit(0);
     }
 
