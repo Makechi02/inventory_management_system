@@ -40,12 +40,14 @@ public class User implements Serializable {
         this.userType = userType;
     }
 
+    public void display() {
+        System.out.println("\nUSER DETAILS");
+        System.out.println("Name: " + name);
+        System.out.println("User type: " + userType);
+    }
+
     @Override
     public String toString() {
-        return "User {" +
-                "name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                ", userType=" + userType +
-                '}';
+        return String.format("%s - %s", name, userType);
     }
 }
