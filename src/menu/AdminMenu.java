@@ -1,9 +1,6 @@
 package menu;
 
-import entity.Inventory;
-import entity.Item;
-import entity.User;
-import entity.UserType;
+import entity.*;
 
 import java.util.List;
 import java.util.Scanner;
@@ -14,14 +11,16 @@ public class AdminMenu {
     private final List<User> users;
     private final Scanner scanner = new Scanner(System.in);
     private final MainActions mainActions;
+    private final UserActions userActions;
 
     private final User user;
 
-    public AdminMenu(Inventory inventory, MainActions mainActions, User user) {
+    public AdminMenu(Inventory inventory, MainActions mainActions, UserActions userActions, User user) {
         this.inventory = inventory;
         items = inventory.getItems();
         users = inventory.getUsers();
         this.mainActions = mainActions;
+        this.userActions = userActions;
         this.user = user;
     }
 
@@ -78,10 +77,85 @@ public class AdminMenu {
 
     private void handleShowAllItems() {
         System.out.println("ALL ITEMS");
-        if (items.isEmpty()) {
-            System.out.println("No items found");
-        } else {
-            items.forEach(Item::display);
+        System.out.println("1. All items");
+        System.out.println("2. Search");
+        System.out.println("3. Filter");
+        System.out.println("4. Back");
+        System.out.print("Enter choice: ");
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1 -> {
+                if (items.isEmpty()) {
+                    System.out.println("No items found");
+                } else {
+                    items.forEach(Item::display);
+                }
+            }
+            case 2 -> displaySearchMenu();
+            case 3 -> displayFilterMenu();
+            case 4 -> {}
+            default -> {
+                System.out.println("Invalid choice\nPlease Try again");
+                handleShowAllItems();
+            }
+        }
+
+    }
+
+    private void displaySearchMenu() {
+        System.out.println("SEARCH MENU");
+        System.out.println("1. Name");
+        System.out.println("2. Back");
+        System.out.print("Enter criteria to use: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter name: ");
+                String name = scanner.nextLine();
+                Item item = inventory.getItemByName(name);
+                if (item != null) item.display();
+                else System.out.println("Item not found");
+            }
+            case 2 -> {}
+            default -> {
+                System.out.println("Invalid choice\nPlease Try again");
+                displaySearchMenu();
+            }
+        }
+    }
+
+    private void displayFilterMenu() {
+        System.out.println("FILTER MENU");
+        System.out.println("1. Category");
+        System.out.println("2. Price range");
+        System.out.print("Enter criteria to use: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter category: ");
+                String category = scanner.nextLine();
+                List<Item> itemList = inventory.filterByCategory(Category.valueOf(category));
+                if (itemList != null) itemList.forEach(Item::display);
+                else System.out.println("Items not found");
+            }
+            case 2 -> {
+                System.out.print("Enter minimum price: ");
+                double minPrice = scanner.nextDouble();
+                System.out.print("Enter maximum price: ");
+                double maxPrice = scanner.nextDouble();
+                List<Item> itemList = inventory.filterByPriceRange(minPrice, maxPrice);
+                if (itemList != null) itemList.forEach(Item::display);
+                else System.out.println("Items not found");
+            }
+            default -> {
+                System.out.println("Invalid choice\nPlease Try again");
+                displayFilterMenu();
+            }
         }
     }
 
@@ -95,13 +169,16 @@ public class AdminMenu {
         System.out.print("Description: ");
         String description = scanner.nextLine();
 
+        System.out.print("Category: ");
+        String category = scanner.nextLine();
+
         System.out.print("Quantity: ");
         int quantity = scanner.nextInt();
 
         System.out.print("Price: ");
         double price = scanner.nextDouble();
 
-        Item item = new Item(name, description, quantity, price);
+        Item item = new Item(name, description, Category.valueOf(category), quantity, price);
         inventory.addItem(item);
         mainActions.saveChanges();
         System.out.println("Item added successfully");
@@ -135,9 +212,10 @@ public class AdminMenu {
         System.out.println("Choose an attribute to update:");
         System.out.println("1. Name");
         System.out.println("2. Description");
-        System.out.println("3. Quantity");
-        System.out.println("4. Price");
-        System.out.println("5. Done");
+        System.out.println("3. Category");
+        System.out.println("4. Quantity");
+        System.out.println("5. Price");
+        System.out.println("6. Done");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -154,16 +232,21 @@ public class AdminMenu {
                 item.setDescription(newDescription);
             }
             case 3 -> {
+                System.out.print("Enter new category: ");
+                String newCategory = scanner.nextLine();
+                item.setCategory(Category.valueOf(newCategory));
+            }
+            case 4 -> {
                 System.out.print("Enter new quantity: ");
                 int newQuantity = scanner.nextInt();
                 item.setQuantity(newQuantity);
             }
-            case 4 -> {
+            case 5 -> {
                 System.out.print("Enter new price: ");
                 double newPrice = scanner.nextDouble();
                 item.setPrice(newPrice);
             }
-            case 5 -> {
+            case 6 -> {
                 System.out.println();
                 return;
             }
@@ -255,69 +338,14 @@ public class AdminMenu {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> user.display();
-                case 2 -> handleUpdateProfile();
-                case 3 -> handleDeleteAccount();
+                case 1 -> userActions.displayUserProfile(user);
+                case 2 -> userActions.updateProfile(user);
+                case 3 -> userActions.deleteAccount(user);
                 case 4 -> {
                     break A;
                 }
                 default -> System.out.println("Invalid choice\nPlease try again!");
             }
-        }
-    }
-
-    private void handleUpdateProfile() {
-        System.out.println("UPDATE PROFILE");
-        System.out.println("Current details");
-        System.out.println(user);
-        System.out.println("Choose an attribute to update");
-        System.out.println("1. Name");
-        System.out.println("2. Password");
-        System.out.print("Enter choice: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (choice) {
-            case 1 -> {
-                System.out.print("Enter new name: ");
-                String name = scanner.nextLine();
-                user.setName(name);
-            }
-            case 2 -> {
-                System.out.print("Enter new password: ");
-                String password = scanner.nextLine();
-                user.setPassword(password);
-            }
-        }
-
-        int index = users.indexOf(user);
-        inventory.updateUser(index, user);
-        mainActions.saveChanges();
-        System.out.println("Profile updated successfully");
-    }
-
-    private void handleDeleteAccount() {
-        System.out.println("DELETE ACCOUNT");
-        System.out.print("Are you sure you want to delete account? (y/n): ");
-        String response = scanner.next();
-        scanner.nextLine();
-
-        switch (response.toLowerCase()) {
-            case "y" -> {
-                System.out.print("Type in your password to delete: ");
-                String password = scanner.nextLine();
-                if (!password.equals(user.getPassword())) {
-                    System.out.println("Incorrect password");
-                    handleDeleteAccount();
-                } else {
-                    int index = users.indexOf(user);
-                    User deletedUser = inventory.deleteUser(index);
-                    if (deletedUser != null) System.out.println("User deleted successfully");
-                    mainActions.saveChanges();
-                    mainActions.onLogout();
-                }
-            }
-            case "n" -> System.out.println("Cancelling request...");
         }
     }
 

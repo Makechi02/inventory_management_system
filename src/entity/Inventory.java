@@ -16,7 +16,7 @@ public class Inventory implements Serializable {
     }
 
     public static void saveToFile(Inventory inventory, String filename) {
-        try(ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename))) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename))) {
             outputStream.writeObject(inventory);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -25,7 +25,7 @@ public class Inventory implements Serializable {
 
     public static Inventory loadFromFile(String filename) {
         Inventory inventory;
-        try(ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
             inventory = (Inventory) inputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             inventory = new Inventory();
@@ -35,11 +35,11 @@ public class Inventory implements Serializable {
     }
 
     private void populateItemsList() {
-        items.add(new Item("Laptop", "Dell Inspiron 15", 10, 7000));
-        items.add(new Item("Smartphone", "IPhone 12", 5, 10000));
-        items.add(new Item("Mouse", "Logitech Wireless Mouse", 20, 300));
-        items.add(new Item("Keyboard", "Mechanical Gaming Keyboard", 15, 800));
-        items.add(new Item("Headphones", "Sony Noise-Cancelling Headphone", 8, 2000));
+        items.add(new Item("Laptop", "Dell Inspiron 15", Category.ELECTRONICS, 10, 7000));
+        items.add(new Item("Smartphone", "IPhone 12", Category.ELECTRONICS, 5, 10000));
+        items.add(new Item("Mouse", "Logitech Wireless Mouse", Category.ELECTRONICS, 20, 300));
+        items.add(new Item("Keyboard", "Mechanical Gaming Keyboard", Category.ELECTRONICS, 15, 800));
+        items.add(new Item("Headphones", "Sony Noise-Cancelling Headphone", Category.ELECTRONICS, 8, 2000));
     }
 
     public void addItem(Item item) {
@@ -68,6 +68,24 @@ public class Inventory implements Serializable {
         return items;
     }
 
+    public Item getItemByName(String name) {
+        Item foundItem = null;
+        for (Item item : items) {
+            if (item.getName().equals(name)) {
+                foundItem = item;
+            }
+        }
+        return foundItem;
+    }
+
+    public List<Item> filterByCategory(Category category) {
+        return items.stream().filter(item -> item.getCategory() == category).toList();
+    }
+
+    public List<Item> filterByPriceRange(double minPrice, double maxPrice) {
+        return items.stream().filter(item -> item.getPrice() >= minPrice && item.getPrice() <= maxPrice).toList();
+    }
+
     private void populateUsersList() {
         users.add(new User("Admin", "admin", UserType.ADMIN));
         users.add(new User("User", "password", UserType.REGULAR));
@@ -89,10 +107,6 @@ public class Inventory implements Serializable {
             user = users.remove(index);
         }
         return user;
-    }
-
-    public User getUser(int index) {
-        return users.get(index);
     }
 
     public List<User> getUsers() {

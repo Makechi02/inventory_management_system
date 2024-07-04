@@ -8,24 +8,23 @@ import java.util.List;
 import java.util.Scanner;
 
 public class RegularMenu {
-    private final Inventory inventory;
     private final List<Item> items;
-    private final List<User> users;
     private final Scanner scanner = new Scanner(System.in);
     private final MainActions mainActions;
+    private final UserActions userActions;
 
     private final User user;
 
-    public RegularMenu(Inventory inventory, MainActions mainActions, User user) {
-        this.inventory = inventory;
+    public RegularMenu(Inventory inventory, MainActions mainActions, UserActions userActions, User user) {
         items = inventory.getItems();
-        users = inventory.getUsers();
         this.mainActions = mainActions;
+        this.userActions = userActions;
         this.user = user;
     }
 
     public void displayMenu() {
-        A: while(true) {
+        A:
+        while (true) {
             System.out.println("\nINVENTORY MANAGEMENT SYSTEM");
             System.out.println("1). Manage items");
             System.out.println("2). Profile");
@@ -49,7 +48,8 @@ public class RegularMenu {
     }
 
     private void displayManageItemsMenu() {
-        A: while(true) {
+        A:
+        while (true) {
             System.out.println("\nINVENTORY MANAGEMENT SYSTEM");
             System.out.println("1). Show all items");
             System.out.println("2). Back to Main Menu");
@@ -77,7 +77,8 @@ public class RegularMenu {
     }
 
     private void displayProfileMenu() {
-        A: while(true) {
+        A:
+        while (true) {
             System.out.println("\nINVENTORY MANAGEMENT SYSTEM");
             System.out.println("1). Show profile");
             System.out.println("2). Update profile");
@@ -88,69 +89,14 @@ public class RegularMenu {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> user.display();
-                case 2 -> handleUpdateProfile();
-                case 3 -> handleDeleteAccount();
+                case 1 -> userActions.displayUserProfile(user);
+                case 2 -> userActions.updateProfile(user);
+                case 3 -> userActions.deleteAccount(user);
                 case 4 -> {
                     break A;
                 }
                 default -> System.out.println("Invalid choice\nPlease try again!");
             }
-        }
-    }
-
-    private void handleUpdateProfile() {
-        System.out.println("UPDATE PROFILE");
-        System.out.println("Current details");
-        System.out.println(user);
-        System.out.println("Choose an attribute to update");
-        System.out.println("1. Name");
-        System.out.println("2. Password");
-        System.out.print("Enter choice: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (choice) {
-            case 1 -> {
-                System.out.print("Enter new name: ");
-                String name = scanner.nextLine();
-                user.setName(name);
-            }
-            case 2 -> {
-                System.out.print("Enter new password: ");
-                String password = scanner.nextLine();
-                user.setPassword(password);
-            }
-        }
-
-        int index = users.indexOf(user);
-        inventory.updateUser(index, user);
-        mainActions.saveChanges();
-        System.out.println("Profile updated successfully");
-    }
-
-    private void handleDeleteAccount() {
-        System.out.println("DELETE ACCOUNT");
-        System.out.print("Are you sure you want to delete account? (y/n): ");
-        String response = scanner.next();
-        scanner.nextLine();
-
-        switch (response.toLowerCase()) {
-            case "y" -> {
-                System.out.print("Type in your password to delete: ");
-                String password = scanner.nextLine();
-                if (!password.equals(user.getPassword())) {
-                    System.out.println("Incorrect password");
-                    handleDeleteAccount();
-                } else {
-                    int index = users.indexOf(user);
-                    User deletedUser = inventory.deleteUser(index);
-                    if (deletedUser != null) System.out.println("User deleted successfully");
-                    mainActions.saveChanges();
-                    mainActions.onLogout();
-                }
-            }
-            case "n" -> System.out.println("Cancelling request...");
         }
     }
 
