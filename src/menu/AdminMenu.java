@@ -1,24 +1,29 @@
 package menu;
 
 import entity.*;
+import service.category.CategoryService;
+import service.category.CategoryServiceImpl;
+import service.item.ItemService;
+import service.item.ItemServiceImpl;
+import service.user.UserService;
+import service.user.UserServiceImpl;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class AdminMenu {
-    private final Inventory inventory;
-    private final List<Item> items;
-    private final List<User> users;
+    private final UserService userService = new UserServiceImpl();
+    private final ItemService itemService = new ItemServiceImpl();
+    private final CategoryService categoryService = new CategoryServiceImpl();
+
+    private final List<Item> items = itemService.getAllItems();
     private final Scanner scanner = new Scanner(System.in);
     private final MainActions mainActions;
     private final UserActions userActions;
 
     private final User user;
 
-    public AdminMenu(Inventory inventory, MainActions mainActions, UserActions userActions, User user) {
-        this.inventory = inventory;
-        items = inventory.getItems();
-        users = inventory.getUsers();
+    public AdminMenu(MainActions mainActions, UserActions userActions, User user) {
         this.mainActions = mainActions;
         this.userActions = userActions;
         this.user = user;
@@ -57,7 +62,8 @@ public class AdminMenu {
             System.out.println("2). Add item");
             System.out.println("3). Update item");
             System.out.println("4). Delete item");
-            System.out.println("5). Back to Main Menu");
+            System.out.println("5). Manage categories");
+            System.out.println("6). Back to Main Menu");
             System.out.print("Choose an option below to continue: ");
 
             int choice = scanner.nextInt();
@@ -67,12 +73,88 @@ public class AdminMenu {
                 case 2 -> handleAddItem();
                 case 3 -> handleUpdateItem();
                 case 4 -> handleDeleteItem();
+                case 5 -> displayManageCategoriesMenu();
+                case 6 -> {
+                    break A;
+                }
+                default -> System.out.println("Invalid choice\nPlease try again!");
+            }
+        }
+    }
+
+    private void displayManageCategoriesMenu() {
+        A: while(true) {
+            System.out.println("\nINVENTORY MANAGEMENT SYSTEM");
+            System.out.println("1). Show all categories");
+            System.out.println("2). Add category");
+            System.out.println("3). Update category");
+            System.out.println("4). Delete category");
+            System.out.println("5). Back");
+            System.out.print("Choose an option below to continue: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> handleShowAllCategories();
+                case 2 -> handleAddCategory();
+                case 3 -> handleUpdateCategory();
+                case 4 -> handleDeleteCategory();
                 case 5 -> {
                     break A;
                 }
                 default -> System.out.println("Invalid choice\nPlease try again!");
             }
         }
+    }
+
+    private void handleShowAllCategories() {
+        List<Category> categories = categoryService.getAllCategories();
+        System.out.println("ALL CATEGORIES");
+        if (categories.isEmpty()) {
+            System.out.println("No categories found");
+        } else {
+            categories.forEach(System.out::println);
+        }
+    }
+
+    private void handleAddCategory() {
+        System.out.println("ADD CATEGORY");
+
+        System.out.print("Enter category name: ");
+        String name = scanner.nextLine();
+
+        Category category = new Category();
+        category.setName(name);
+        int result = categoryService.saveCategory(category);
+        if (result > 0) System.out.println("Category added successfully");
+        else System.out.println("An error occurred");
+    }
+
+    private void handleUpdateCategory() {
+        System.out.println("UPDATE CATEGORY");
+
+        System.out.print("Enter name of category to update: ");
+        String name = scanner.nextLine();
+        Category category = categoryService.getCategoryByName(name);
+
+        System.out.print("Enter new name: ");
+        String newName = scanner.nextLine();
+        category.setName(newName);
+
+        int result = categoryService.updateCategory(name, category);
+        if (result > 0) System.out.println("Category updated successfully");
+        else System.out.println("An error occurred");
+    }
+
+    private void handleDeleteCategory() {
+        System.out.println("DELETE CATEGORY");
+        System.out.print("Enter name of category to delete: ");
+        String name = scanner.nextLine();
+
+        int result = categoryService.deleteCategory(name);
+        if (result > 0) System.out.println("Category deleted successfully");
+        else System.out.println("An error occurred");
+
     }
 
     private void handleShowAllItems() {
@@ -105,7 +187,7 @@ public class AdminMenu {
 
     private void displaySearchMenu() {
         System.out.println("SEARCH MENU");
-        System.out.println("1. Name");
+        System.out.println("1. SKU");
         System.out.println("2. Back");
         System.out.print("Enter criteria to use: ");
         int choice = scanner.nextInt();
@@ -113,11 +195,10 @@ public class AdminMenu {
 
         switch (choice) {
             case 1 -> {
-                System.out.print("Enter name: ");
-                String name = scanner.nextLine();
-                Item item = inventory.getItemByName(name);
-                if (item != null) item.display();
-                else System.out.println("Item not found");
+                System.out.print("Enter sku: ");
+                String sku = scanner.nextLine();
+                Item item = itemService.getItemBySku(sku);
+                item.display();
             }
             case 2 -> {}
             default -> {
@@ -137,9 +218,8 @@ public class AdminMenu {
 
         switch (choice) {
             case 1 -> {
-                System.out.print("Enter category: ");
-                String category = scanner.nextLine();
-                List<Item> itemList = inventory.filterByCategory(Category.valueOf(category));
+                Category category = getCategory();
+                List<Item> itemList = itemService.filterByCategory(category);
                 if (itemList != null) itemList.forEach(Item::display);
                 else System.out.println("Items not found");
             }
@@ -148,7 +228,7 @@ public class AdminMenu {
                 double minPrice = scanner.nextDouble();
                 System.out.print("Enter maximum price: ");
                 double maxPrice = scanner.nextDouble();
-                List<Item> itemList = inventory.filterByPriceRange(minPrice, maxPrice);
+                List<Item> itemList = itemService.filterByPriceRange(minPrice, maxPrice);
                 if (itemList != null) itemList.forEach(Item::display);
                 else System.out.println("Items not found");
             }
@@ -166,11 +246,14 @@ public class AdminMenu {
         System.out.print("Name: ");
         String name = scanner.nextLine();
 
-        System.out.print("Description: ");
-        String description = scanner.nextLine();
+        System.out.print("Brand: ");
+        String brand = scanner.nextLine();
 
-        System.out.print("Category: ");
-        String category = scanner.nextLine();
+        System.out.print("Model: ");
+        String model = scanner.nextLine();
+
+        System.out.print("SKU: ");
+        String sku = scanner.nextLine();
 
         System.out.print("Quantity: ");
         int quantity = scanner.nextInt();
@@ -178,44 +261,46 @@ public class AdminMenu {
         System.out.print("Price: ");
         double price = scanner.nextDouble();
 
-        Item item = new Item(name, description, Category.valueOf(category), quantity, price);
-        inventory.addItem(item);
-        mainActions.saveChanges();
-        System.out.println("Item added successfully");
+        Category category = getCategory();
+
+        Item item = new Item(name, brand, model, sku, quantity, price, category);
+        int result = itemService.saveItem(item);
+        if (result > 0) System.out.println("Item added successfully");
+        else System.out.println("An error occurred");
+    }
+
+    private Category getCategory() {
+        System.out.println("CATEGORIES");
+        List<Category> categories = categoryService.getAllCategories();
+        categories.forEach(System.out::println);
+        System.out.print("Choose category: ");
+        int choice = scanner.nextInt();
+        return categoryService.getCategoryById(choice);
     }
 
     private void handleUpdateItem() {
         System.out.println("UPDATE ITEM");
 
-        System.out.print("Enter name of item to update: ");
-        String name = scanner.nextLine();
-        int index = -1;
+        System.out.print("Enter sku of item to update: ");
+        String sku = scanner.nextLine();
+        Item item = itemService.getItemBySku(sku);
 
-        for (Item item : items) {
-            if (item.getName().equals(name)) {
-                index = items.indexOf(item);
-            }
-        }
-
-        if (index == -1) System.out.println("Item not found");
-        else {
-            Item item = inventory.getItem(index);
-            updateItem(item);
-            inventory.updateItem(index, item);
-            mainActions.saveChanges();
-            System.out.println("Item updated successfully");
-        }
+        updateItem(item);
+        int result = itemService.updateItem(sku, item);
+        if (result > 0) System.out.println("Item updated successfully");
+        else System.out.println("An error occurred");
     }
 
     private void updateItem(Item item) {
         item.display();
         System.out.println("Choose an attribute to update:");
         System.out.println("1. Name");
-        System.out.println("2. Description");
-        System.out.println("3. Category");
+        System.out.println("2. Brand");
+        System.out.println("3. Model");
         System.out.println("4. Quantity");
         System.out.println("5. Price");
-        System.out.println("6. Done");
+        System.out.println("6. Category");
+        System.out.println("7. Done");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -227,14 +312,14 @@ public class AdminMenu {
                 item.setName(newName);
             }
             case 2 -> {
-                System.out.print("Enter new description: ");
-                String newDescription = scanner.nextLine();
-                item.setDescription(newDescription);
+                System.out.print("Enter new brand: ");
+                String newBrand = scanner.nextLine();
+                item.setBrand(newBrand);
             }
             case 3 -> {
-                System.out.print("Enter new category: ");
-                String newCategory = scanner.nextLine();
-                item.setCategory(Category.valueOf(newCategory));
+                System.out.print("Enter new model: ");
+                String newModel = scanner.nextLine();
+                item.setModel(newModel);
             }
             case 4 -> {
                 System.out.print("Enter new quantity: ");
@@ -247,6 +332,10 @@ public class AdminMenu {
                 item.setPrice(newPrice);
             }
             case 6 -> {
+                Category newCategory = getCategory();
+                item.setCategory(newCategory);
+            }
+            case 7 -> {
                 System.out.println();
                 return;
             }
@@ -261,21 +350,11 @@ public class AdminMenu {
     private void handleDeleteItem() {
         System.out.println("DELETE ITEM");
         System.out.print("Enter name of item to delete: ");
-        String name = scanner.nextLine();
+        String sku = scanner.nextLine();
 
-        int index = -1;
-        for (Item item : items) {
-            if (item.getName().equals(name)) {
-                index = items.indexOf(item);
-            }
-        }
-
-        if (index == -1) System.out.println("Item not found");
-        else {
-            Item item = inventory.deleteItem(index);
-            mainActions.saveChanges();
-            if (item != null) System.out.println("Item deleted successfully");
-        }
+        int result = itemService.deleteItem(sku);
+        if (result > 0) System.out.println("Item deleted successfully");
+        else System.out.println("An error occurred");
     }
 
     private void displayManageUsersMenu() {
@@ -301,6 +380,7 @@ public class AdminMenu {
 
     private void handleShowAllUsers() {
         System.out.println("ALL USERS");
+        List<User> users = userService.getAllUsers();
         if (users.isEmpty()) {
             System.out.println("No users found");
         } else {
@@ -310,20 +390,24 @@ public class AdminMenu {
 
     private void handleAddUser() {
         System.out.println("Enter user details to continue");
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
         System.out.print("Username: ");
         String username = scanner.nextLine();
         System.out.print("Password: ");
         String password = scanner.nextLine();
-        System.out.print("User type: ");
+        System.out.print("Role: ");
         String userType = scanner.nextLine();
 
         User user = new User();
-        user.setName(username);
+        user.setName(name);
+        user.setUsername(username);
         user.setPassword(password);
-        user.setUserType(UserType.valueOf(userType));
-        inventory.addUser(user);
-        mainActions.saveChanges();
-        System.out.println("User was added successfully");
+        user.setRole(Role.valueOf(userType));
+
+        int result = userService.saveUser(user);
+        if (result > 0) System.out.println("User was added successfully");
+        else System.out.println("An error occurred while saving the user");
     }
 
     private void displayProfileMenu() {

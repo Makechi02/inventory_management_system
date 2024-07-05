@@ -1,32 +1,28 @@
-import entity.Inventory;
+import entity.Role;
 import entity.User;
-import entity.UserType;
 import menu.AdminMenu;
 import menu.MainActions;
 import menu.RegularMenu;
 import menu.UserActions;
+import service.user.UserService;
+import service.user.UserServiceImpl;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static final String FILENAME = "inventory.dat";
-    private static final Inventory inventory = Inventory.loadFromFile(FILENAME);
-    private static final List<User> users = inventory.getUsers();
+    private static final UserService userService = new UserServiceImpl();
+
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         displayAccountActions();
-    }    private static final MainActions mainActions = new MainActions() {
-        @Override
-        public void saveChanges() {
-            Inventory.saveToFile(inventory, FILENAME);
-        }
+    }
 
+    private static final MainActions mainActions = new MainActions() {
         @Override
         public void onExit() {
             System.out.println("Exiting...");
-            Inventory.saveToFile(inventory, FILENAME);
             scanner.close();
         }
 
@@ -47,7 +43,9 @@ public class Main {
             case 1 -> displayLoginMenu();
             case 2 -> displayRegistrationMenu();
         }
-    }    private static final UserActions userActions = new UserActions() {
+    }
+
+    private static final UserActions userActions = new UserActions() {
         @Override
         public void displayUserProfile(User user) {
             user.display();
@@ -60,7 +58,8 @@ public class Main {
             System.out.println(user);
             System.out.println("Choose an attribute to update");
             System.out.println("1. Name");
-            System.out.println("2. Password");
+            System.out.println("2. Username");
+            System.out.println("3. Password");
             System.out.print("Enter choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -72,16 +71,20 @@ public class Main {
                     user.setName(name);
                 }
                 case 2 -> {
+                    System.out.print("Enter new username: ");
+                    String username = scanner.nextLine();
+                    user.setUsername(username);
+                }
+                case 3 -> {
                     System.out.print("Enter new password: ");
                     String password = scanner.nextLine();
                     user.setPassword(password);
                 }
             }
 
-            int index = users.indexOf(user);
-            inventory.updateUser(index, user);
-            mainActions.saveChanges();
-            System.out.println("Profile updated successfully");
+            int result = userService.updateUser(user.getUsername(), user);
+            if (result > 0) System.out.println("Profile updated successfully");
+            else System.out.println("An error occurred");
         }
 
         @Override
@@ -99,10 +102,10 @@ public class Main {
                         System.out.println("Incorrect password");
                         deleteAccount(user);
                     } else {
-                        int index = users.indexOf(user);
-                        User deletedUser = inventory.deleteUser(index);
-                        if (deletedUser != null) System.out.println("User deleted successfully");
-                        mainActions.saveChanges();
+                        int result = userService.deleteUser(user.getUsername());
+                        if (result > 0) System.out.println("User deleted successfully");
+                        else System.out.println("An error occurred");
+
                         mainActions.onLogout();
                     }
                 }
@@ -124,12 +127,12 @@ public class Main {
             return;
         }
 
-        AdminMenu adminMenu = new AdminMenu(inventory, mainActions, userActions, authenticatedUser);
-        RegularMenu regularMenu = new RegularMenu(inventory, mainActions, userActions, authenticatedUser);
+        AdminMenu adminMenu = new AdminMenu(mainActions, userActions, authenticatedUser);
+        RegularMenu regularMenu = new RegularMenu(mainActions, userActions, authenticatedUser);
 
-        if (authenticatedUser.getUserType() == UserType.ADMIN) {
+        if (authenticatedUser.getRole() == Role.ADMIN) {
             adminMenu.displayMenu();
-        } else if (authenticatedUser.getUserType() == UserType.REGULAR) {
+        } else if (authenticatedUser.getRole() == Role.USER) {
             regularMenu.displayMenu();
         }
     }
@@ -144,25 +147,25 @@ public class Main {
         User user = new User();
         user.setName(username);
         user.setPassword(password);
-        user.setUserType(UserType.REGULAR);
-        inventory.addUser(user);
-        System.out.println("User was added successfully");
+        user.setRole(Role.USER);
+
+        int result = userService.saveUser(user);
+        if (result > 0) System.out.println("User was added successfully");
+        else System.out.println("An error occurred while saving the user");
+
         displayLoginMenu();
     }
 
     private static User authenticateUser(String username, String password) {
         User foundUser = null;
-
+        List<User> users = userService.getAllUsers();
         for (User user : users) {
-            if (user.getName().equals(username) && user.getPassword().equals(password)) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 foundUser = user;
             }
         }
 
         return foundUser;
     }
-
-
-
 
 }

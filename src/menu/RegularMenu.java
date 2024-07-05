@@ -1,22 +1,24 @@
 package menu;
 
-import entity.Inventory;
 import entity.Item;
 import entity.User;
+import service.item.ItemService;
+import service.item.ItemServiceImpl;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class RegularMenu {
-    private final List<Item> items;
+    private final ItemService itemService = new ItemServiceImpl();
+
+    private final List<Item> items = itemService.getAllItems();
     private final Scanner scanner = new Scanner(System.in);
     private final MainActions mainActions;
     private final UserActions userActions;
 
     private final User user;
 
-    public RegularMenu(Inventory inventory, MainActions mainActions, UserActions userActions, User user) {
-        items = inventory.getItems();
+    public RegularMenu(MainActions mainActions, UserActions userActions, User user) {
         this.mainActions = mainActions;
         this.userActions = userActions;
         this.user = user;
