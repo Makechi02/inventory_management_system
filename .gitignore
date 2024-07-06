@@ -29,3 +29,4 @@ bin/
 .DS_Store
 
 database.properties
+lib/javafx-sdk-22.0.1/
