@@ -203,6 +203,30 @@ public class Connections {
         return users;
     }
 
+    public List<User> searchUsersByUsername(String username) {
+        List<User> users = new ArrayList<>();
+        try(Connection connection = getConnection()) {
+            String query = "SELECT * FROM users WHERE username LIKE ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, "%" + username + "%");
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setName(resultSet.getString("name"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                users.add(user);
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return users;
+    }
+
     public int saveUser(User user) {
         try(Connection connection = getConnection()) {
             String query = "INSERT INTO users(name, username, password, role) VALUES (?, ?, ?, ?)";
@@ -301,6 +325,33 @@ public class Connections {
         try(Connection connection = getConnection()) {
             String query = "SELECT * FROM items";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Item item = new Item();
+                item.setId(resultSet.getInt("item_id"));
+                item.setName(resultSet.getString("name"));
+                item.setBrand(resultSet.getString("brand"));
+                item.setModel(resultSet.getString("model"));
+                item.setSku(resultSet.getString("sku"));
+                item.setQuantity(resultSet.getInt("quantity"));
+                item.setPrice(resultSet.getDouble("price"));
+                item.setCategory(getCategoryById(resultSet.getInt("category_id")));
+                items.add(item);
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return items;
+    }
+
+    public List<Item> searchItemsByName(String name) {
+        List<Item> items = new ArrayList<>();
+        try(Connection connection = getConnection()) {
+            String query = "SELECT * FROM items WHERE name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, "%" + name + "%");
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

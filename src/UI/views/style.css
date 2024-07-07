@@ -1,0 +1,66 @@
+.root {
+    -fx-font-family: "Comic Sans MS";
+    -fx-background-color: #F4F4F4;
+}
+
+.button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-padding: 2 10;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.button:hover {
+    -fx-background-color: #2980B9;
+}
+
+.button:pressed {
+    -fx-background-color: #1C6D99;
+}
+
+.text-field {
+    --border-color: #3498DB;
+    -fx-border-width: 1;
+    -fx-padding: 5;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.combo-box {
+    -fx-border-color: #3498DB;
+    -fx-border-width: 1;
+    -fx-padding: 5;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.table-view {
+    -fx-border-color: #DDDDDD;
+    -fx-border-width: 1;
+    -fx-background-color: #FFFFFF;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: #333333;
+    -fx-border-color: transparent;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell {
+    -fx-font-family: "JetBrainsMono NF";
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}

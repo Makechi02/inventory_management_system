@@ -13,4 +13,5 @@ public interface ItemService {
     int deleteItem(String sku);
     List<Item> filterByCategory(Category category);
     List<Item> filterByPriceRange(double minPrice, double maxPrice);
+    List<Item> searchItemsByName(String name);
 }

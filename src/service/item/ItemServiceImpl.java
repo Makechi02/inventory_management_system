@@ -56,4 +56,9 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = getAllItems();
         return items.stream().filter(item -> item.getPrice() >= minPrice && item.getPrice() <= maxPrice).toList();
     }
+
+    @Override
+    public List<Item> searchItemsByName(String name) {
+        return connections.searchItemsByName(name);
+    }
 }

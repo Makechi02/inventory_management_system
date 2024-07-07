@@ -16,5 +16,18 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/javafx-sdk-22.0.1/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <NATIVE>
+          <root url="file://$MODULE_DIR$/lib/javafx-sdk-22.0.1/lib" />
+        </NATIVE>
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/javafx-sdk-22.0.1/lib" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

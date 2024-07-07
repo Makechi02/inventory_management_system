@@ -51,4 +51,9 @@ public class UserServiceImpl implements UserService {
         }
         return connections.deleteUser(username);
     }
+
+    @Override
+    public List<User> searchUserByUsername(String username) {
+        return connections.searchUsersByUsername(username);
+    }
 }

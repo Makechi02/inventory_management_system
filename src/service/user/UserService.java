@@ -10,4 +10,5 @@ public interface UserService {
     int saveUser(User user);
     int updateUser(String username, User user);
     int deleteUser(String username);
+    List<User> searchUserByUsername(String username);
 }
