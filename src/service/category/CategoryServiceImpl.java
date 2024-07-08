@@ -2,6 +2,9 @@ package service.category;
 
 import connections.Connections;
 import entity.Category;
+import exception.RequestValidationException;
+import exception.DuplicateResourceException;
+import exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -11,14 +14,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryByName(String name) {
         Category category = connections.getCategoryByName(name);
-        if (category == null) throw new RuntimeException("Category with name: " + name + " not found");
+        if (category == null) throw new ResourceNotFoundException("Category with name: " + name + " not found");
         return category;
     }
 
     @Override
     public Category getCategoryById(int id) {
         Category category = connections.getCategoryById(id);
-        if (category == null) throw new RuntimeException("Category with id: " + id + " not found");
+        if (category == null) throw new ResourceNotFoundException("Category with id: " + id + " not found");
         return category;
     }
 
@@ -30,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public int saveCategory(Category category) {
         if (connections.categoryExistsByName(category.getName()))
-            throw new RuntimeException("Category already exists");
+            throw new DuplicateResourceException("Category already exists");
         return connections.saveCategory(category);
     }
 
@@ -39,6 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category fetchedCategory = connections.getCategoryByName(name);
         if (fetchedCategory == null) {
             throw new RuntimeException("Category with name: " + name + " not found");
+            throw new ResourceNotFoundException("Category with name: " + name + " not found");
         }
         return connections.updateCategory(fetchedCategory.getId(), category.getName());
     }
