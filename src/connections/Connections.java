@@ -175,7 +175,30 @@ public class Connections {
         return user;
     }
 
-    public boolean UserExistsByUsername(String username) {
+    public User getUserById(int id) {
+        User user = null;
+        try(Connection connection = getConnection()) {
+            String query = "SELECT * FROM users WHERE id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setName(resultSet.getString("name"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return user;
+    }
+
+    public boolean userExistsByUsername(String username) {
         User user = getUserByUsername(username);
         return user != null;
     }
@@ -242,13 +265,13 @@ public class Connections {
         }
     }
 
-    public int updateUser(int id, String name, String username, String password) {
+    public int updateUser(int id, User user) {
         try(Connection connection = getConnection()) {
             String query = "UPDATE users SET name = ?, username = ?, password = ? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, username);
-            preparedStatement.setString(3, password);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getUsername());
+            preparedStatement.setString(3, user.getPassword());
             preparedStatement.setInt(4, id);
 
             return preparedStatement.executeUpdate();

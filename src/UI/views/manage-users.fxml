@@ -12,7 +12,7 @@
     <TextField promptText="Search users" fx:id="searchField" onKeyPressed="#handleSearch"/>
     <TableView fx:id="usersTable">
         <columns>
-            <TableColumn text="ID" fx:id="idColumn" style="-fx-alignment: CENTER-RIGHT;"/>
+            <TableColumn text="S/No" fx:id="idColumn" style="-fx-alignment: CENTER;"/>
             <TableColumn text="Name" fx:id="nameColumn" style="-fx-alignment: CENTER-LEFT;"/>
             <TableColumn text="Username" fx:id="usernameColumn" style="-fx-alignment: CENTER-LEFT;"/>
             <TableColumn text="Role" fx:id="roleColumn" style="-fx-alignment: CENTER-LEFT;"/>

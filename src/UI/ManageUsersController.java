@@ -3,7 +3,9 @@ package UI;
 import UI.utils.StyleUtil;
 import entity.Role;
 import entity.User;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,7 +40,10 @@ public class ManageUsersController {
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setCellValueFactory(cellData -> {
+            int rowIndex = usersTable.getItems().indexOf(cellData.getValue()) + 1;
+            return new ReadOnlyObjectWrapper<>(rowIndex);
+        });
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
@@ -47,6 +52,7 @@ public class ManageUsersController {
         usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         addActionsToTable();
+        usersTable.getItems().addListener((ListChangeListener<User>) _ -> usersTable.refresh());
     }
 
     private void addActionsToTable() {
@@ -109,10 +115,7 @@ public class ManageUsersController {
 
             dialogStage.showAndWait();
 
-            if (addEditItemController.isSaveClicked()) {
-                userService.updateUser(user.getUsername(), user);
-                usersTable.refresh();
-            }
+            if (addEditItemController.isUpdateDone()) usersTable.refresh();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -153,8 +156,8 @@ public class ManageUsersController {
 
             dialogStage.showAndWait();
 
-            if (addEditItemController.isSaveClicked()) {
-                userService.saveUser(user);
+            if (addEditItemController.isUpdateDone()) {
+                usersTable.getItems().add(user);
                 usersTable.refresh();
             }
         } catch (IOException e) {
