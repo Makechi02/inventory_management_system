@@ -3,7 +3,9 @@ package UI;
 import UI.utils.StyleUtil;
 import entity.Category;
 import entity.Item;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,7 +44,10 @@ public class ManageItemsController {
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setCellValueFactory(cellData -> {
+            int rowIndex = itemsTable.getItems().indexOf(cellData.getValue()) + 1;
+            return new ReadOnlyObjectWrapper<>(rowIndex);
+        });
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         brandColumn.setCellValueFactory(new PropertyValueFactory<>("brand"));
         modelColumn.setCellValueFactory(new PropertyValueFactory<>("model"));
@@ -75,6 +80,7 @@ public class ManageItemsController {
         itemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         addActionsToTable();
+        itemsTable.getItems().addListener((ListChangeListener<Item>) _ -> itemsTable.refresh());
     }
 
     private void addActionsToTable() {
@@ -137,8 +143,7 @@ public class ManageItemsController {
 
             dialogStage.showAndWait();
 
-            if (addEditItemController.isSaveClicked()) {
-                itemService.updateItem(item.getSku(), item);
+            if (addEditItemController.isUpdateDone()) {
                 itemsTable.refresh();
             }
         } catch (IOException e) {
@@ -181,8 +186,8 @@ public class ManageItemsController {
 
             dialogStage.showAndWait();
 
-            if (addEditItemController.isSaveClicked()) {
-                itemService.saveItem(item);
+            if (addEditItemController.isUpdateDone()) {
+                itemsTable.getItems().add(item);
                 itemsTable.refresh();
             }
         } catch (IOException e) {

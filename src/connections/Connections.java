@@ -293,6 +293,20 @@ public class Connections {
     }
 
 //    ITEMS
+    public int getNextItemId() {
+        int nextId = 1;
+        String query = "SELECT MAX(item_id) FROM items";
+        try(Connection connection = getConnection();Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                nextId = resultSet.getInt(1) + 1;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return nextId;
+    }
+
     public int saveItem(Item item) {
         try(Connection connection = getConnection()) {
             String query = "INSERT INTO items(name, brand, model, sku, quantity, price, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
