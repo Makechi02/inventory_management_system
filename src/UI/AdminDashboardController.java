@@ -23,7 +23,7 @@ public class AdminDashboardController {
 
     @FXML
     private void handleManageCategories() {
-        loadView("/UI/views/manage-items.fxml");
+        loadView("/UI/views/manage-categories.fxml");
     }
 
     @FXML

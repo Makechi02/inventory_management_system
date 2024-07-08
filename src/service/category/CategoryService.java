@@ -10,5 +10,6 @@ public interface CategoryService {
     List<Category> getAllCategories();
     int saveCategory(Category category);
     int updateCategory(String name, Category category);
+    int updateCategory(int id, String name);
     int deleteCategory(String name);
 }

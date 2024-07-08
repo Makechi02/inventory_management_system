@@ -41,10 +41,30 @@ public class CategoryServiceImpl implements CategoryService {
     public int updateCategory(String name, Category category) {
         Category fetchedCategory = connections.getCategoryByName(name);
         if (fetchedCategory == null) {
-            throw new RuntimeException("Category with name: " + name + " not found");
             throw new ResourceNotFoundException("Category with name: " + name + " not found");
         }
+
         return connections.updateCategory(fetchedCategory.getId(), category.getName());
+    }
+
+    @Override
+    public int updateCategory(int id, String name) {
+        Category fetchedCategory = connections.getCategoryById(id);
+        if (fetchedCategory == null) {
+            throw new ResourceNotFoundException("Category with id: " + id + " not found");
+        }
+
+        boolean changes = false;
+
+        if (!name.isBlank() && !name.equals(fetchedCategory.getName())) {
+            if (connections.categoryExistsByName(name))
+                throw new DuplicateResourceException("Category already exist");
+            changes = true;
+        }
+
+        if (!changes) throw new RequestValidationException("No changes made");
+
+        return connections.updateCategory(fetchedCategory.getId(), name);
     }
 
     @Override
