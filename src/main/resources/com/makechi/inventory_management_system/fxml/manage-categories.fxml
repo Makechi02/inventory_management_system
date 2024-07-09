@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox
+        xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21"
+        fx:controller="com.makechi.inventory_management_system.controller.ManageCategoriesController"
+        spacing="20" style="-fx-background-radius: 10; -fx-background-color: #ecf0f1;" VBox.vgrow="ALWAYS">
+
+    <TextField promptText="Search categories" fx:id="searchField" onKeyPressed="#handleSearch"/>
+    <TableView fx:id="categoriesTable">
+        <columns>
+            <TableColumn text="S/No" fx:id="serialNoColumn" style="-fx-alignment: CENTER;"/>
+            <TableColumn text="Name" fx:id="nameColumn" style="-fx-alignment: CENTER-LEFT;"/>
+            <TableColumn text="Actions" fx:id="actionsColumn" />
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button text="Add Category" onAction="#handleAddItem"/>
+    </HBox>
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+</VBox>
+

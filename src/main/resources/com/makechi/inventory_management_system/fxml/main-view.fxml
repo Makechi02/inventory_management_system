@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      xmlns="http://javafx.com/javafx"
+      fx:controller="com.makechi.inventory_management_system.controller.MainController"
+      spacing="10" padding="10">
+
+    <TableView fx:id="table">
+        <columns>
+            <TableColumn text="Name" fx:id="nameColumn"/>
+            <TableColumn text="Brand" fx:id="brandColumn"/>
+            <TableColumn text="Model" fx:id="modelColumn"/>
+            <TableColumn text="SKU" fx:id="skuColumn"/>
+            <TableColumn text="Quantity" fx:id="quantityColumn"/>
+            <TableColumn text="Price" fx:id="priceColumn"/>
+        </columns>
+    </TableView>
+</VBox>
